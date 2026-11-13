@@ -1,0 +1,41 @@
+{
+  "name": "ux-quality-check",
+  "version": "0.2.0",
+  "description": "Check the UX of a UI change: find the surfaces a diff touches, check each against a catalog of common defects by reading code and measuring in the browser, and report surface, rule, evidence and fix.",
+  "author": {
+    "name": "Jesse Yang",
+    "url": "https://github.com/ktmud"
+  },
+  "keywords": [
+    "ux",
+    "ui",
+    "review",
+    "accessibility",
+    "react",
+    "css",
+    "frontend"
+  ],
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "UX Quality Check",
+    "shortDescription": "Check a UI change against a catalog of common UX defects.",
+    "longDescription": "Finds the UI surfaces a diff touches and checks each against a catalog of common defects, grouped as feedback and state (pending, loading, hover and pressed states, refresh, lost input, errors, disabled reasons, status, stopping long runs), layout and spacing (gutters, page frame, alignment and heights, gaps, text fit, overflow, viewport height, interaction shift, layers, overlay size and anchoring, scroll areas, phone layouts, targets, layout shift), controls and icons (dead controls, inputs that fit their data), content and forms (copy, labels, defaults, consistent views, references, filters, charts, AI marks), navigation (back, reload, titles, section permalinks) and the visual system (type tokens, contrast, edge stripes, nested boxes). Reads the code and, with a dev server and a browser tool, measures the page at rest, on hover and on focus. Reports each finding as surface, rule, evidence and fix.",
+    "developerName": "Jesse Yang",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read"
+    ],
+    "defaultPrompt": [
+      "Check the UX of this change.",
+      "UX review the UI files in this diff.",
+      "Look for UX issues on the page I just changed."
+    ],
+    "brandColor": "#FF5A5F",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png",
+    "websiteURL": "https://ktmud.github.io/ux-quality-check-skill/"
+  },
+  "homepage": "https://ktmud.github.io/ux-quality-check-skill/",
+  "repository": "https://github.com/ktmud/ux-quality-check-skill"
+}

@@ -1,0 +1,38 @@
+{
+  "name": "ux-quality-check",
+  "owner": {
+    "name": "Jesse Yang",
+    "url": "https://github.com/ktmud"
+  },
+  "metadata": {
+    "description": "UX quality check: a skill that checks UI changes for common UX defects."
+  },
+  "plugins": [
+    {
+      "name": "ux-quality-check",
+      "source": "./",
+      "description": "Check the UX of a UI change: find the surfaces a diff touches, check each against a catalog of common defects by reading code and measuring in the browser, and report surface, rule, evidence and fix.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Jesse Yang",
+        "url": "https://github.com/ktmud"
+      },
+      "homepage": "https://ktmud.github.io/ux-quality-check-skill/",
+      "repository": "https://github.com/ktmud/ux-quality-check-skill",
+      "license": "MIT",
+      "keywords": [
+        "ux",
+        "ui",
+        "review",
+        "accessibility",
+        "react",
+        "css",
+        "frontend"
+      ],
+      "category": "development",
+      "skills": [
+        "./skills/ux-quality-check"
+      ]
+    }
+  ]
+}

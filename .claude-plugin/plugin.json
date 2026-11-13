@@ -1,0 +1,22 @@
+{
+  "name": "ux-quality-check",
+  "version": "0.2.0",
+  "description": "Check the UX of a UI change: find the surfaces a diff touches, check each against a catalog of common defects by reading code and measuring in the browser, and report surface, rule, evidence and fix.",
+  "author": {
+    "name": "Jesse Yang",
+    "url": "https://github.com/ktmud"
+  },
+  "keywords": [
+    "ux",
+    "ui",
+    "review",
+    "accessibility",
+    "react",
+    "css",
+    "frontend"
+  ],
+  "license": "MIT",
+  "icon": "./assets/icon.png",
+  "homepage": "https://ktmud.github.io/ux-quality-check-skill/",
+  "repository": "https://github.com/ktmud/ux-quality-check-skill"
+}

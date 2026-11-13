@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UX Quality Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff; --bg-2: #f6f7f9; --panel: #ffffff; --ink: #14161a; --ink-2: #4a505b; --ink-3: #7a808b;
+  --line: #e3e6eb; --line-2: #d3d7de; --accent: #e8484e; --accent-ink: #ffffff; --accent-soft: #fde8e9;
+  --bad: #e5484d; --bad-soft: rgba(229,72,77,.12); --good: #1f9d6b; --good-soft: rgba(31,157,107,.12);
+  --scan: rgba(232,72,78,.18); --shadow: 0 1px 2px rgba(16,18,24,.06), 0 8px 24px rgba(16,18,24,.06);
+  --code-bg: #f4f5f7; --c-kw: #b4235a; --c-str: #0b7a52; --c-num: #9a5b00; --c-fn: #2457c5; --c-com: #6b7280;
+  /* specimen UI tokens: a neutral product chrome */
+  --ui-bg: #ffffff; --ui-ink: #222; --ui-muted: #6b7280; --ui-line: #e4e4e7; --ui-sel: #e8e8e8; --ui-hover: #f0f0f0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --bg-2: #151820; --panel: #171a21; --ink: #eef0f3; --ink-2: #b3b9c4; --ink-3: #868d99;
+    --line: #262a33; --line-2: #333845; --accent: #ff6a6f; --accent-ink: #1a0c0d; --accent-soft: rgba(255,106,111,.14);
+    --bad: #ff6a6f; --bad-soft: rgba(255,106,111,.16); --good: #3fd39a; --good-soft: rgba(63,211,154,.14);
+    --scan: rgba(255,106,111,.22); --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    --code-bg: #12151b; --c-kw: #ff8ab0; --c-str: #6fe0a8; --c-num: #ffc56b; --c-fn: #8ab4ff; --c-com: #8a919c;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --bg-2: #151820; --panel: #171a21; --ink: #eef0f3; --ink-2: #b3b9c4; --ink-3: #868d99;
+  --line: #262a33; --line-2: #333845; --accent: #ff6a6f; --accent-ink: #1a0c0d; --accent-soft: rgba(255,106,111,.14);
+  --bad: #ff6a6f; --bad-soft: rgba(255,106,111,.16); --good: #3fd39a; --good-soft: rgba(63,211,154,.14);
+  --scan: rgba(255,106,111,.22); --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  --code-bg: #12151b; --c-kw: #ff8ab0; --c-str: #6fe0a8; --c-num: #ffc56b; --c-fn: #8ab4ff; --c-com: #8a919c;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 Inter, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); }
+code, .mono { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; font-size: .88em; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(1.4) blur(10px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); text-decoration: none; }
+.brand svg { width: 26px; height: 26px; border-radius: 7px; }
+.top nav { display: flex; gap: 4px; margin-left: auto; }
+.top nav a { color: var(--ink-2); text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 10px; border-radius: 8px; }
+.top nav a:hover, .top nav a:focus-visible { background: var(--bg-2); color: var(--ink); outline: none; }
+.theme-btn { margin-left: 8px; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink-2); border-radius: 8px; height: 32px; width: 32px; display: grid; place-items: center; cursor: pointer; }
+.theme-btn:hover { color: var(--ink); }
+.theme-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* hero */
+.hero { padding: 72px 0 40px; position: relative; overflow: hidden; }
+.hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; }
+h1 { font-size: clamp(38px, 5.2vw, 62px); line-height: 1.04; letter-spacing: -.035em; margin: 18px 0 18px; font-weight: 800; }
+h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), #ff9a5a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { font-size: 19px; color: var(--ink-2); max-width: 34em; margin: 0 0 28px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font: 600 15px/1 Inter, sans-serif; padding: 12px 18px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; text-decoration: none; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-ghost { background: var(--panel); color: var(--ink); border-color: var(--line-2); }
+.btn-ghost:hover { background: var(--bg-2); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* hero inspector visual */
+.inspector { position: relative; border-radius: 18px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 14px; aspect-ratio: 1.5; }
+.inspector .chrome { display: flex; gap: 6px; padding: 2px 4px 12px; }
+.inspector .chrome i { width: 10px; height: 10px; border-radius: 50%; background: var(--line-2); display: block; }
+.mock { position: relative; height: calc(100% - 26px); border-radius: 10px; border: 1px solid var(--line); display: grid; grid-template-columns: 30% 1fr; overflow: hidden; background: var(--bg-2); }
+.mock .side { border-right: 1px solid var(--line); padding: 14px 10px; display: flex; flex-direction: column; }
+.mock .row { height: 26px; border-radius: 7px; margin: 0; display: flex; align-items: center; padding: 0 8px; }
+.mock .row b { height: 7px; border-radius: 4px; background: var(--line-2); display: block; width: 70%; }
+.mock .row.sel { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.mock .row.hov { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.mock .main { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.mock .bar { height: 10px; border-radius: 5px; background: var(--line-2); }
+.mock .card { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.mock .mbtn { font: 600 11px/1 Inter, sans-serif; color: var(--ink-2); border: 1px solid var(--line-2); background: var(--panel); border-radius: 6px; padding: 6px 10px; }
+.mock .bar.faint { background: color-mix(in srgb, var(--line-2) 45%, transparent); }
+.mock .banner { margin-left: -16px; border-radius: 0 10px 10px 0; background: color-mix(in srgb, #3b82f6 16%, var(--panel)); border: 1px solid color-mix(in srgb, #3b82f6 30%, transparent); height: 34px; }
+.callout { position: absolute; font: 600 12px/1 "JetBrains Mono", monospace; color: #fff; background: var(--bad); padding: 6px 8px; border-radius: 7px; box-shadow: 0 6px 18px rgba(229,72,77,.35); opacity: 0; transform: translateY(6px) scale(.96); white-space: nowrap; }
+.callout::after { content: ""; position: absolute; width: 8px; height: 8px; background: inherit; transform: rotate(45deg); left: 12px; bottom: -4px; }
+.callout.below::after { bottom: auto; top: -4px; }
+.reticle { position: absolute; border: 2px solid var(--bad); border-radius: 8px; opacity: 0; }
+.scanbar { position: absolute; left: 0; right: 0; height: 60px; background: linear-gradient(180deg, transparent, var(--scan), transparent); top: -60px; pointer-events: none; }
+.hero-play .scanbar { animation: scan 6s ease-in-out infinite; }
+@keyframes scan { 0% { top: -60px; } 40% { top: 100%; } 100% { top: 100%; } }
+.hero-play .c1, .hero-play .r1 { animation: pop 6s ease infinite; animation-delay: .7s; }
+.hero-play .c2, .hero-play .r2 { animation: pop 6s ease infinite; animation-delay: 1.3s; }
+.hero-play .c3, .hero-play .r3 { animation: pop 6s ease infinite; animation-delay: 1.9s; }
+.hero-play .c4, .hero-play .r4 { animation: pop 6s ease infinite; animation-delay: 2.5s; }
+@keyframes pop { 0% { opacity: 0; transform: translateY(6px) scale(.96); } 6% { opacity: 1; transform: none; } 72% { opacity: 1; transform: none; } 80%, 100% { opacity: 0; } }
+
+/* stats */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); margin: 8px 0 24px; }
+.stat { padding: 20px 22px; border-left: 1px solid var(--line); }
+.stat:first-child { border-left: 0; }
+.stat b { display: block; font-size: 32px; letter-spacing: -.03em; font-weight: 800; line-height: 1.1; }
+.stat span { color: var(--ink-2); font-size: 14px; }
+
+/* sections */
+section.block { padding: 56px 0 8px; }
+h2 { font-size: clamp(28px, 3.4vw, 38px); letter-spacing: -.025em; line-height: 1.15; margin: 0 0 10px; font-weight: 800; }
+h3 { font-size: 21px; letter-spacing: -.015em; line-height: 1.25; margin: 0 0 6px; font-weight: 700; }
+h4 { font-size: 15px; margin: 0; font-weight: 600; }
+.sub { color: var(--ink-2); font-size: 17px; max-width: 46em; margin: 0 0 28px; }
+.permalink { opacity: 0; margin-left: .4em; font-weight: 400; text-decoration: none; color: var(--ink-3); transition: opacity .12s ease; display: inline-flex; align-items: center; vertical-align: middle; }
+h2:hover .permalink, h3:hover .permalink, .permalink:focus-visible { opacity: 1; }
+.permalink:hover { color: var(--accent); }
+.permalink svg { display: block; width: .68em; height: .68em; transform: translateY(-.085em); }
+h2[id], h3[id] { scroll-margin-top: 76px; }
+
+/* video */
+.video-frame { border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); background: #0b0d11; aspect-ratio: 16/9; }
+.video-frame video { width: 100%; height: 100%; display: block; }
+
+/* pipeline */
+.pipe { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; counter-reset: step; }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; position: relative; }
+.step::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font: 700 13px/1 Inter, sans-serif; margin-bottom: 10px; }
+.step b { display: block; font-size: 15px; margin-bottom: 4px; }
+.step p { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+
+/* specimens */
+.specs { display: flex; flex-direction: column; gap: 28px; }
+.spec { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--panel); box-shadow: var(--shadow); }
+.spec-left { padding: 22px; background: var(--bg-2); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.spec-right { padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.spec-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.seen { font-size: 12.5px; color: var(--ink-3); font-weight: 500; }
+.num { font: 700 12px/1 "JetBrains Mono", monospace; color: var(--accent); letter-spacing: .02em; white-space: nowrap; padding-top: 10px; }
+.spec-right p.why { margin: 0; color: var(--ink-2); font-size: 15px; }
+.controls { display: flex; align-items: center; gap: 8px; flex: none; }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; padding: 3px; background: var(--panel); }
+.seg button { border: 0; background: transparent; font: 600 13px/1 Inter, sans-serif; color: var(--ink-2); padding: 8px 12px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.run { border: 0; background: var(--accent); color: var(--accent-ink); font: 600 13px/1 Inter, sans-serif; padding: 10px 14px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-width: 116px; justify-content: center; }
+.run:hover { filter: brightness(1.06); }
+.run:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.run[aria-busy="true"] { opacity: .75; cursor: progress; }
+.run svg { width: 14px; height: 14px; }
+.stage-wrap { position: relative; border-radius: 12px; }
+.stage { position: relative; background: var(--ui-bg); color: var(--ui-ink); border: 1px solid var(--line); border-radius: 12px; min-height: 250px; overflow: hidden; font: 14px/20px Inter, system-ui, sans-serif; }
+.overlay { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.stage-wrap .scan { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; pointer-events: none; }
+.stage-wrap .scan::before { content: ""; position: absolute; left: 0; right: 0; height: 70px; top: -70px; background: linear-gradient(180deg, transparent, var(--scan), transparent); }
+.stage-wrap.scanning .scan::before { animation: sweep .8s ease-in-out; }
+@keyframes sweep { to { top: 100%; } }
+.ann-line { stroke-width: 2; fill: none; stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw .5s ease forwards; }
+.ann-box { stroke-width: 2; fill: none; rx: 6; stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: draw .7s ease forwards; }
+.ann-ghost { stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; opacity: .9; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.tone-bad { stroke: var(--bad); }
+.tone-good { stroke: var(--good); }
+.ann-label { position: absolute; font: 600 12px/1 "JetBrains Mono", monospace; padding: 5px 7px; border-radius: 6px; color: #fff; white-space: nowrap; opacity: 0; animation: fadein .3s ease .35s forwards; box-shadow: 0 4px 14px rgba(0,0,0,.18); z-index: 2; }
+.ann-label.bad { background: var(--bad); }
+.ann-label.good { background: var(--good); }
+@keyframes fadein { to { opacity: 1; } }
+
+/* finding card */
+.finding { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.finding .fh { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg-2); border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 600; }
+.sev { font: 700 11px/1 Inter, sans-serif; letter-spacing: .04em; text-transform: uppercase; padding: 4px 7px; border-radius: 6px; }
+.sev.high { background: var(--bad); color: #fff; }
+.sev.medium { background: color-mix(in srgb, #f59e0b 22%, transparent); color: color-mix(in srgb, #b45309 70%, var(--ink)); }
+.sev.low { background: var(--line); color: var(--ink-2); }
+.sev.pass { background: var(--good-soft); color: var(--good); }
+.sev.idle { background: var(--line); color: var(--ink-2); }
+.rule-chip { margin-left: auto; font: 600 12px/1 "JetBrains Mono", monospace; color: var(--ink-2); background: var(--panel); border: 1px solid var(--line-2); padding: 4px 7px; border-radius: 6px; }
+.finding dl { display: grid; grid-template-columns: 76px 1fr; gap: 8px 12px; margin: 0; padding: 14px; font-size: 14px; }
+.finding dt { color: var(--ink-3); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; padding-top: 2px; }
+.finding dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.finding dd.ev { font-family: "JetBrains Mono", monospace; font-size: 12.5px; line-height: 1.55; color: var(--ink); background: var(--code-bg); border-radius: 8px; padding: 8px 10px; min-height: calc(4 * 1.55em + 16px); }
+.finding .placeholder { color: var(--ink-3); font-family: Inter, sans-serif; font-size: 13.5px; }
+.caret::after { content: "▍"; color: var(--accent); animation: blink 1s steps(1) infinite; margin-left: 1px; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---------- specimen mini UIs: a current product chrome, kept light on both page themes ---------- */
+.stage { --u-ink: #18181b; --u-ink2: #52525b; --u-mut: #71717a; --u-line: #e7e7ea; --u-soft: #f4f4f5; --u-sel: rgba(24,24,27,.075); --u-hov: rgba(24,24,27,.045); --u-acc: #6366f1;
+  font: 13.5px/20px Inter, system-ui, sans-serif; letter-spacing: -.005em; color: var(--u-ink); background: #fff; }
+.ui { padding: 18px; }
+.ui svg.i { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ui .muted { color: var(--u-mut); font-size: 12.5px; }
+.ui h5 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.015em; }
+.ui .eyebrow-u { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--u-mut); }
+/* nav list */
+.ui .side { width: 220px; display: flex; flex-direction: column; }
+.ui .item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px; color: var(--u-ink2); text-decoration: none; font-weight: 500; cursor: default; }
+.ui .item .cnt { margin-left: auto; font-size: 11.5px; color: var(--u-mut); background: var(--u-soft); border-radius: 999px; padding: 0 7px; line-height: 18px; }
+.ui .item.selected { background: var(--u-sel); color: var(--u-ink); font-weight: 600; }
+.ui .item:hover, .ui .item.sim-hover { background: var(--u-hov); color: var(--u-ink); }
+.fixed .ui .side { gap: 2px; }
+.fixed .ui .item.selected:hover, .fixed .ui .item.selected.sim-hover { background: rgba(24,24,27,.1); }
+/* app frame with a nav rail */
+.ui-frame { display: flex; min-height: 260px; padding: 0; }
+.ui-frame .nav { width: 168px; border-right: 1px solid var(--u-line); padding: 14px 10px; flex: none; background: #fafafa; display: flex; flex-direction: column; gap: 2px; }
+.ui-frame .nav .brandu { display: flex; align-items: center; gap: 8px; font-weight: 650; padding: 2px 8px 12px; }
+.ui-frame .nav .brandu i { width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(135deg, #6366f1, #a855f7); display: block; }
+.ui-frame .content { flex: 1; padding: 18px 24px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* buttons */
+.ui .bt, .ui .tb button, .ui .btn-ui { display: inline-flex; align-items: center; gap: 6px; font: 550 13px/1 Inter, sans-serif; height: 32px; padding: 0 12px; border: 1px solid var(--u-line); background: #fff; border-radius: 8px; color: var(--u-ink); cursor: pointer; box-shadow: 0 1px 2px rgba(24,24,27,.05); }
+.ui .bt.primary, .ui .btn-ui.save { background: var(--u-ink); color: #fff; border-color: var(--u-ink); }
+.ui .btn-ui[disabled] { opacity: .7; cursor: progress; }
+.ui .tb { display: flex; gap: 8px; }
+.ui .tbwrap { margin-top: 10px; }
+.ui .tbwrap .menu { margin-top: 6px; }
+.fixed .ui .tbwrap { position: relative; }
+.fixed .ui .tbwrap .menu { position: absolute; top: 100%; left: 0; z-index: 3; }
+.ui .menu { display: none; border: 1px solid var(--u-line); background: #fff; border-radius: 10px; padding: 4px; width: 188px; box-shadow: 0 12px 32px -8px rgba(24,24,27,.18), 0 2px 6px rgba(24,24,27,.06); }
+.ui .menu.open { display: block; }
+.ui .menu div { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: 13px; }
+.ui .menu div:first-child { background: var(--u-soft); }
+.ui .menu div kbd { margin-left: auto; font: 500 11px/1 Inter, sans-serif; color: var(--u-mut); }
+.ui .menu svg.i { width: 14px; height: 14px; color: var(--u-acc); }
+.ui .menu div:not(:first-child) svg.i { visibility: hidden; }
+/* cards */
+.ui .card-ui { border: 1px solid var(--u-line); border-radius: 12px; padding: 12px 14px; background: #fff; box-shadow: 0 1px 2px rgba(24,24,27,.04); display: flex; align-items: center; gap: 12px; }
+.ui .card-ui .kpi { font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.ui .card-ui .ic { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--u-soft); color: var(--u-ink2); }
+.ui .psa { display: flex; align-items: center; gap: 10px; background: linear-gradient(90deg, #eef2ff, #f5f3ff); border: 1px solid #e0e7ff; color: #3730a3; padding: 10px 14px; border-radius: 0 12px 12px 0; margin-left: -24px; font-size: 13px; font-weight: 500; }
+.ui .psa .pill { font-size: 11px; font-weight: 650; background: #6366f1; color: #fff; padding: 2px 8px; border-radius: 999px; }
+.fixed .ui .psa { margin-left: 0; border-radius: 12px; }
+/* rows with avatars */
+.ui .rows { display: flex; flex-direction: column; width: 290px; gap: 2px; }
+.ui .rrow { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; }
+.ui .rrow .av { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 10.5px; font-weight: 700; color: #fff; flex: none; }
+.ui .rrow .nm { flex: 1; font-weight: 500; }
+.ui .rrow .ct { font-variant-numeric: tabular-nums; color: var(--u-ink2); font-weight: 600; font-size: 12.5px; background: var(--u-soft); border-radius: 999px; padding: 0 8px; line-height: 20px; }
+.ui .rrow .hide { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px; color: var(--u-mut); border: 0; background: transparent; cursor: pointer; flex: none; }
+.ui .rrow .slot { width: 24px; height: 24px; flex: none; }
+/* composer */
+.ui .composer { border: 1px solid var(--u-line); border-radius: 12px; background: #fff; box-shadow: 0 1px 2px rgba(24,24,27,.04); overflow: hidden; }
+.ui .composer textarea { display: block; width: 100%; min-height: 72px; font: 13.5px/20px Inter, sans-serif; padding: 12px 14px; border: 0; resize: none; color: var(--u-ink); background: transparent; outline: none; }
+.ui .composer .bar { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-top: 1px solid var(--u-line); background: #fcfcfd; }
+.ui .composer .bar .sp { flex: 1; }
+.ui .err { display: flex; gap: 8px; align-items: flex-start; color: #b42318; background: #fef3f2; border: 1px solid #fee4e2; border-radius: 10px; font-size: 12.5px; margin: 10px 0 0; padding: 8px 10px; }
+.ui .log { font: 12px/19px "JetBrains Mono", monospace; background: #0c0c10; color: #c9cbd3; border-radius: 10px; padding: 10px 12px; min-height: 66px; margin-top: 10px; }
+.ui .log .req { display: flex; gap: 10px; }
+.ui .log .m { color: #a5b4fc; } .ui .log .ok { color: #4ade80; } .ui .log .wait { color: #fbbf24; }
+.ui .spinner { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; display: inline-block; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* file list */
+.ui .list { border: 1px solid var(--u-line); border-radius: 12px; min-height: 150px; display: flex; flex-direction: column; overflow: hidden; }
+.ui .list .li { padding: 10px 12px; border-top: 1px solid var(--u-line); display: flex; align-items: center; gap: 10px; }
+.ui .list .li:first-child { border-top: 0; }
+.ui .list .ft { font: 700 9.5px/1 Inter, sans-serif; letter-spacing: .04em; width: 30px; height: 22px; border-radius: 6px; display: grid; place-items: center; color: #fff; flex: none; }
+.ui .list .nm { flex: 1; font-weight: 500; }
+.ui .empty { margin: auto; color: var(--u-mut); text-align: center; font-size: 13px; display: grid; justify-items: center; gap: 6px; }
+.ui .empty svg.i { width: 22px; height: 22px; color: #a1a1aa; }
+.ui .sk { height: 10px; border-radius: 6px; background: linear-gradient(90deg, #f1f1f3, #f8f8f9, #f1f1f3); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+.ui .sk.ft { background-color: #f1f1f3; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+/* dark dashboard */
+.ui-dark { background: radial-gradient(600px 300px at 20% 0%, #1e2133, #111318 70%); color: #ececf1; }
+.ui-dark .tile { background: #1b1e28; border: 1px solid #2a2e3b; border-radius: 12px; padding: 14px 16px; }
+.ui-dark .tile .t { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.ui-dark .tile .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.18); }
+.ui-dark .tile .dot.amber { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.18); }
+.ui-dark .meta { color: #4f5462; font-size: 12.5px; margin-top: 4px; }
+.fixed .ui-dark .meta { color: #a1a7b4; }
+.ui-dark .bar2 { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); margin-top: 12px; overflow: hidden; }
+.ui-dark .bar2 b { display: block; height: 100%; width: 50%; background: linear-gradient(90deg, #6366f1, #22d3ee); }
+/* team rows with dividers */
+.ui .tlist { border: 1px solid var(--u-line); border-radius: 14px; padding: 6px; background: #fff; }
+.ui .trow { display: flex; align-items: center; gap: 12px; padding: 12px; border-top: 1px solid var(--u-line); border-radius: 12px; }
+.ui .trow:first-child { border-top: 0; }
+.ui .trow:hover, .ui .trow.sim-hover { background: var(--u-soft); }
+.fixed .ui .trow { border-radius: 0; }
+.fixed .ui .trow:hover, .fixed .ui .trow.sim-hover { border-radius: 12px; border-top-color: transparent; }
+.fixed .ui .trow:hover + .trow, .fixed .ui .trow.sim-hover + .trow { border-top-color: transparent; }
+.ui .trow .tav { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; font-weight: 700; font-size: 12px; flex: none; }
+.ui .trow .tn { font-weight: 600; } .ui .trow .td { color: var(--u-mut); font-size: 12.5px; }
+.ui .trow .tr { margin-left: auto; color: var(--u-mut); font-size: 12.5px; text-align: right; }
+
+/* toggle demo */
+.ui .tbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.ui .tbar .sp { flex: 1; }
+.ui .chipsu { display: flex; gap: 6px; flex-wrap: wrap; }
+.ui .chipu { font-size: 12px; font-weight: 550; border: 1px dashed #d4d4d8; color: var(--u-ink2); border-radius: 999px; padding: 3px 10px; }
+.ui .tgl[aria-pressed="true"] { background: var(--u-soft); }
+.fixed .ui .tgl { width: 124px; justify-content: center; }
+.fixed .ui .chipsu { margin: -4px 0 12px; }
+.ui .grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.ui .grid.two { grid-template-columns: 1fr 1fr; }
+.ui .iss { display: flex; align-items: center; gap: 8px; border: 1px solid var(--u-line); border-radius: 10px; padding: 8px 10px; font-weight: 500; }
+.ui .iss .id { font: 500 11.5px/1 "JetBrains Mono", monospace; color: var(--u-mut); white-space: nowrap; }
+.ui .iss .st { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #a1a1aa; flex: none; }
+.ui .iss .st.ip { border-color: #f59e0b; border-right-color: transparent; }
+
+/* catalog */
+.groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.group { border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: var(--panel); }
+.group h4 { margin-bottom: 10px; display: flex; align-items: baseline; justify-content: space-between; }
+.group h4 span { color: var(--ink-3); font-weight: 500; font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 12px/1 "JetBrains Mono", monospace; padding: 5px 7px; border-radius: 6px; background: var(--bg-2); color: var(--ink-2); border: 1px solid var(--line); }
+.chip.hot { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+
+/* code */
+pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font: 13px/1.6 "JetBrains Mono", monospace; color: var(--ink); }
+.tk-kw { color: var(--c-kw); } .tk-str { color: var(--c-str); } .tk-num { color: var(--c-num); } .tk-fn { color: var(--c-fn); } .tk-com { color: var(--c-com); font-style: italic; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+footer { padding: 56px 0 72px; color: var(--ink-3); font-size: 14px; }
+
+/* tour mode (video) */
+.tour-cap { position: fixed; left: 50%; bottom: 36px; transform: translateX(-50%) translateY(20px); z-index: 130; background: rgba(12,14,18,.92); color: #fff; border-radius: 14px; padding: 14px 22px; font: 600 22px/1.3 Inter, sans-serif; letter-spacing: -.01em; max-width: 80%; text-align: center; opacity: 0; transition: opacity .35s ease, transform .35s ease; box-shadow: 0 10px 40px rgba(0,0,0,.35); pointer-events: none; }
+.tour-cap.on { opacity: 1; transform: translateX(-50%); }
+.tour-cap small { display: block; font: 500 15px/1.4 Inter, sans-serif; color: #c7ccd6; margin-top: 4px; }
+.tour-card { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; background: radial-gradient(1200px 600px at 50% 40%, #2a1416, #0b0d11 70%); color: #fff; text-align: center; opacity: 0; pointer-events: none; transition: opacity .5s ease; }
+.tour-card.on { opacity: 1; }
+.tour-card h6 { font: 800 76px/1.02 Inter, sans-serif; letter-spacing: -.04em; margin: 18px 0 14px; }
+.tour-card h6 em { font-style: normal; background: linear-gradient(90deg, #ff6a6f, #ffa463); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tour-card p { font: 500 24px/1.4 Inter, sans-serif; color: #c7ccd6; margin: 0; }
+.tour-card .logo { width: 84px; height: 84px; border-radius: 20px; }
+.tour-card code { font-size: 22px; background: rgba(255,255,255,.08); padding: 10px 16px; border-radius: 10px; display: inline-block; margin-top: 26px; color: #ffd7d8; }
+.tour-cursor { position: fixed; z-index: 110; width: 22px; height: 22px; left: 0; top: 0; pointer-events: none; transition: transform .55s cubic-bezier(.3,.7,.2,1); display: none; }
+.tour .tour-cursor { display: block; }
+.tour .top { position: absolute; left: 0; right: 0; }
+.tour .spec { scroll-margin-top: 14px; }
+.tour h2[id] { scroll-margin-top: 20px; }
+.tour .tour-cap { font-size: 18px; padding: 11px 18px; bottom: 18px; max-width: 86%; }
+
+@media (max-width: 900px) {
+  .hero-grid, .spec, .two { grid-template-columns: 1fr; }
+  .spec-left { border-right: 0; border-bottom: 1px solid var(--line); }
+  .pipe { grid-template-columns: 1fr 1fr; }
+  .groups { grid-template-columns: 1fr 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat:nth-child(3) { border-left: 0; }
+  .stat:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .top nav { display: none; }
+  .theme-btn { margin-left: auto; }
+}
+@media (max-width: 560px) {
+  .spec-head { flex-direction: column; }
+  .wrap { padding: 0 16px; }
+  .groups, .pipe { grid-template-columns: 1fr; }
+  .ui-frame .nav { width: 120px; }
+  .ui .side, .ui .rows { width: 100%; }
+  .hero { padding-top: 40px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="104" fill="#FF5A5F"/>
+  <rect x="80" y="104" width="304" height="248" rx="28" fill="#FFFFFF"/>
+  <path d="M108 104h248a28 28 0 0 1 28 28v28H80v-28a28 28 0 0 1 28-28z" fill="#FFD9DA"/>
+  <g fill="#FF5A5F">
+    <circle cx="116" cy="132" r="9"/>
+    <circle cx="144" cy="132" r="9"/>
+    <circle cx="172" cy="132" r="9"/>
+  </g>
+  <g fill="#FFB3B5">
+    <rect x="112" y="188" width="92" height="132" rx="12"/>
+    <rect x="224" y="188" width="128" height="24" rx="12"/>
+    <rect x="224" y="230" width="96" height="24" rx="12"/>
+  </g>
+  <circle cx="340" cy="328" r="76" fill="#FFFFFF" stroke="#C2363B" stroke-width="22"/>
+  <path d="M396 384 440 428" stroke="#C2363B" stroke-width="34" stroke-linecap="round"/>
+  <path d="M306 330 330 354 376 304" fill="none" stroke="#C2363B" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+ UX Quality Check</a>
+    <nav aria-label="Sections">
+      <a href="#watch">Watch</a>
+      <a href="#bugs">Bugs it catches</a>
+      <a href="#how">How it works</a>
+      <a href="#catalog">Catalog</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/ktmud/ux-quality-check-skill" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button class="theme-btn" id="theme" aria-label="Switch light or dark theme">
+      <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM8 3v10a5 5 0 0 1 0-10Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">A skill for Claude Code and Codex</span>
+        <h1>UX bugs that <em>pass code review</em>, caught before they ship.</h1>
+        <p class="lede">An agent changes your UI. <b>ux-quality-check</b> finds the surfaces the diff touches, then checks each one against 52 rules mined from real UX feedback. It reads the code and measures the live page at rest, on hover and on focus.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#bugs">Try the bugs yourself</a>
+          <a class="btn btn-ghost" href="#watch">Watch the promo</a>
+        </div>
+      </div>
+      <div class="inspector hero-play" aria-hidden="true">
+        <div class="chrome"><i></i><i></i><i></i></div>
+        <div class="mock">
+          <div class="side">
+            <div class="row sel" data-t="rows"><b style="width:60%"></b></div>
+            <div class="row hov" data-t="rows"><b></b></div>
+            <div class="row"><b style="width:52%"></b></div>
+            <div class="row"><b style="width:66%"></b></div>
+          </div>
+          <div class="main">
+            <div style="display:flex;justify-content:space-between;align-items:center"><div class="bar" style="width:40%;height:14px"></div><div class="mbtn" data-t="btn">Save</div></div>
+            <div class="banner" data-t="banner"></div>
+            <div class="card"><div class="bar" style="width:70%"></div><div class="bar faint" data-t="faint" style="width:52%"></div></div>
+            <div class="card"><div class="bar" style="width:80%"></div><div class="bar" style="width:40%"></div></div>
+          </div>
+          <div class="scanbar"></div>
+        </div>
+        <div class="reticle r1" data-for="rows"></div><span class="callout c1" data-for="rows">gap: 0px on :hover</span>
+        <div class="reticle r2" data-for="banner"></div><span class="callout c2" data-for="banner">inset 0px, siblings 16px</span>
+        <div class="reticle r3" data-for="btn"></div><span class="callout c3" data-for="btn">2 × POST on double-click</span>
+        <div class="reticle r4" data-for="faint"></div><span class="callout c4" data-for="faint">contrast 2.2 : 1</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><b>52</b><span>rules in 6 groups, each with a code check, a browser check and a fix</span></div>
+    <div class="stat"><b>244</b><span>UX feedback items mined from past agent sessions and bug bash notes</span></div>
+    <div class="stat"><b>3</b><span>interaction states measured for every changed row: rest, hover, focus</span></div>
+    <div class="stat"><b>0</b><span>findings on a diff with no UI. It says so and stops</span></div>
+  </div>
+
+  <section class="block" id="watch-s">
+    <h2 id="watch">Watch it work<!--PL:watch--></h2>
+    <p class="sub">Under a minute: four of the bugs below, measured live. Captions are in the player menu.</p>
+    <div class="video-frame"><video src="tour.mp4" poster="poster.png" controls playsinline preload="metadata"><track kind="captions" src="tour.vtt" srclang="en" label="English"></video></div>
+  </section>
+
+  <section class="block">
+    <h2 id="bugs">Ten bugs it catches<!--PL:bugs--></h2>
+    <p class="sub">Each one comes from real review feedback. Press <b>Run check</b> to see the skill's measurement on the live mini-app, then switch to <b>Fixed</b> and run it again. The measurements on this page come from the skill's own <code>scripts/measure.js</code>, inlined.</p>
+    <div class="specs" id="specs"></div>
+  </section>
+
+  <section class="block">
+    <h2 id="how">How it works<!--PL:how--></h2>
+    <p class="sub">The skill checks only what the diff changed, runs only the rules that apply, and checks each finding once more before it reports it.</p>
+    <div class="pipe">
+      <div class="step"><b>Find the change</b><p>Reads the diff. With no UI file, it says so and stops.</p></div>
+      <div class="step"><b>Map the surfaces</b><p>Tags each surface with its kinds: <code>write</code>, <code>list</code>, <code>overlay</code>…</p></div>
+      <div class="step"><b>Pick the rules</b><p>Runs each rule whose kinds match. The repo's own UI rules come first.</p></div>
+      <div class="step"><b>Read, then measure</b><p>Code first. Then boxes, gaps and shifts at rest, on hover and on focus.</p></div>
+      <div class="step"><b>Check and report</b><p>Re-measures each finding, and keeps defects the diff did not add apart.</p></div>
+    </div>
+    <div class="two" style="margin-top:18px">
+      <pre aria-label="Measuring a hover in Playwright"><code class="language-js"><span class="tk-com">// Load the skill&#x27;s helpers, then measure a hover</span>
+<span class="tk-kw">await</span> page.<span class="tk-fn">addScriptTag</span>({ path: <span class="tk-str">&quot;scripts/measure.js&quot;</span> });
+<span class="tk-kw">await</span> page.<span class="tk-fn">evaluate</span>(() =&gt; <span class="tk-fn">snapshot</span>(<span class="tk-str">&quot;.item&quot;</span>, <span class="tk-str">&quot;rest&quot;</span>));
+<span class="tk-kw">await</span> page.<span class="tk-fn">hover</span>(<span class="tk-str">&quot;text=Your requests&quot;</span>);
+<span class="tk-kw">await</span> page.<span class="tk-fn">evaluate</span>(() =&gt; <span class="tk-fn">gaps</span>(<span class="tk-str">&quot;.item&quot;</span>));
+<span class="tk-com">// → [{ from: &quot;Home&quot;, to: &quot;Your requests&quot;, y: 0 }]</span>
+<span class="tk-kw">await</span> page.<span class="tk-fn">evaluate</span>(() =&gt; <span class="tk-fn">moved</span>(<span class="tk-str">&quot;rest&quot;</span>, <span class="tk-str">&quot;hover&quot;</span>));
+<span class="tk-com">// → []   hover moved nothing</span></code></pre>
+      <pre aria-label="A finding as the skill reports it"><code class="language-md"><span class="tk-kw">**Surface:**</span> Sidebar nav, “Your requests” hovered
+<span class="tk-kw">**Rule:**</span> <span class="tk-str">`no-cramped-controls`</span>
+<span class="tk-kw">**Evidence:**</span> <span class="tk-str">`gaps(&quot;.item&quot;)`</span> at <span class="tk-num">1440</span>px, row <span class="tk-num">2</span>
+hovered: y: <span class="tk-num">0</span> between “Home” (selected) and
+“Your requests”. At rest the gap is also 0, but
+only the selected row draws a box.
+<span class="tk-kw">**Fix:**</span> Add <span class="tk-str">`gap: 2px`</span> to the list.</code></pre>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 id="catalog">The catalog<!--PL:catalog--></h2>
+    <p class="sub">52 rules in six groups. Highlighted ids are the ten demonstrated above.</p>
+    <div class="groups"><div class="group"><h4>Feedback and state <span>12 rules</span></h4><div class="chips"><span class="chip hot">pending-write</span><span class="chip hot">loading-is-not-empty</span><span class="chip">refresh-in-place</span><span class="chip">progress-visible-elsewhere</span><span class="chip hot">keep-user-input</span><span class="chip">disabled-says-why</span><span class="chip">status-is-visible</span><span class="chip">not-color-alone</span><span class="chip">interaction-states</span><span class="chip">confirm-once</span><span class="chip">errors-lead-to-fix</span><span class="chip">long-work-can-stop</span></div></div><div class="group"><h4>Layout and spacing <span>16 rules</span></h4><div class="chips"><span class="chip hot">consistent-gutters</span><span class="chip">same-page-frame</span><span class="chip">aligned-edges</span><span class="chip hot">columns-align</span><span class="chip hot">no-cramped-controls</span><span class="chip">text-fits</span><span class="chip">no-horizontal-overflow</span><span class="chip">fits-the-viewport</span><span class="chip hot">no-interaction-shift</span><span class="chip hot">toggle-stays-put</span><span class="chip">layer-order</span><span class="chip">overlay-sizing</span><span class="chip">popover-anchoring</span><span class="chip">clear-scroll-areas</span><span class="chip">mobile-layout</span><span class="chip">targets-and-shift</span></div></div><div class="group"><h4>Controls and icons <span>8 rules</span></h4><div class="chips"><span class="chip">icon-matches-action</span><span class="chip">no-decorative-icons</span><span class="chip">no-dead-controls</span><span class="chip">one-control-per-concept</span><span class="chip">one-selection-system</span><span class="chip">control-fits-the-data</span><span class="chip">hover-also-focus-touch</span><span class="chip">no-native-dialogs</span></div></div><div class="group"><h4>Content and forms <span>8 rules</span></h4><div class="chips"><span class="chip">no-empty-filler</span><span class="chip">labels-name-the-action</span><span class="chip">safe-traceable-defaults</span><span class="chip">same-data-same-view</span><span class="chip">references-link-out</span><span class="chip">filters-show-state</span><span class="chip">chart-legibility</span><span class="chip">ai-mark</span></div></div><div class="group"><h4>Navigation <span>3 rules</span></h4><div class="chips"><span class="chip">navigation-keeps-place</span><span class="chip">page-titles</span><span class="chip">section-permalinks</span></div></div><div class="group"><h4>Visual system <span>5 rules</span></h4><div class="chips"><span class="chip">type-tokens</span><span class="chip hot">theme-contrast</span><span class="chip">no-edge-stripe</span><span class="chip">no-nested-boxes</span><span class="chip hot">no-stray-corners</span></div></div></div>
+  </section>
+
+  <section class="block">
+    <h2 id="install">Install<!--PL:install--></h2>
+    <p class="sub">Add the marketplace, install the plugin, then ask your agent to <i>"check the UX of this change"</i> after a UI edit. Source on <a href="https://github.com/ktmud/ux-quality-check-skill" target="_blank" rel="noopener">GitHub</a>.</p>
+    <div class="two">
+      <pre aria-label="Install in Claude Code"><code class="language-bash"><span class="tk-com"># Claude Code</span>
+<span class="tk-fn">claude</span> plugin marketplace add ktmud/ux-quality-check-skill
+<span class="tk-fn">claude</span> plugin install ux-quality-check@ux-quality-check</code></pre>
+      <pre aria-label="Install in Codex"><code class="language-bash"><span class="tk-com"># Codex</span>
+<span class="tk-fn">codex</span> plugin marketplace add https://github.com/ktmud/ux-quality-check-skill
+<span class="tk-fn">codex</span> plugin add ux-quality-check@ux-quality-check</code></pre>
+    </div>
+  </section>
+</div>
+</main>
+<footer><div class="wrap">ux-quality-check · MIT · <a href="https://github.com/ktmud/ux-quality-check-skill" target="_blank" rel="noopener">github.com/ktmud/ux-quality-check-skill</a> · the mini-apps on this page recreate real defects with neutral data.</div></footer>
+
+<div class="tour-cap" id="cap"></div>
+<div class="tour-card" id="card"></div>
+<svg class="tour-cursor" id="cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2l15 9-6.5 1.6L16 20l-3 1.4-3.2-7.4L4 18z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>
+
+<script>
+// UX quality check measurement helpers.
+//
+// Paste this whole file into the page with the browser tool's JavaScript action, or load it with
+// Playwright's page.addScriptTag({ path }). Each helper returns plain data to put in a finding's
+// evidence. The file defines the helpers on `window`, so they stay callable across separate
+// JavaScript calls. A second paste replaces the helpers and keeps the saved snapshots and the
+// layout-shift total.
+(() => {
+  const state = (window.__uxq = window.__uxq || { snaps: {}, shifts: [], observing: false });
+
+  // A short name for an element in evidence: tag, id and classes. Works for SVG elements, whose
+  // className is an object.
+  const label = (el) => {
+    if (!el || !el.tagName) return String(el);
+    const cls = (el.getAttribute("class") || "").trim().split(/\s+/).filter(Boolean).slice(0, 3);
+    const text = (el.getAttribute("aria-label") || el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 30);
+    return `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}${cls.map((c) => `.${c}`).join("")}${text ? ` "${text}"` : ""}`;
+  };
+
+  // All elements that match, or an error that names the selector. An empty match is a wrong
+  // selector far more often than a pass, so it fails loudly.
+  const all = (sel) => {
+    const els = [...document.querySelectorAll(sel)];
+    if (!els.length) throw new Error(`no element matches ${sel}`);
+    return els;
+  };
+  const half = (n) => Math.round(n * 2) / 2;
+
+  // Right edges of the matched elements. Sibling counts in one column return one value.
+  const rightEdges = (sel) => all(sel).map((el) => half(el.getBoundingClientRect().right));
+
+  // Left and right inset of each direct child of a container, in px.
+  const insets = (sel) => {
+    const box = all(sel)[0];
+    const b = box.getBoundingClientRect();
+    return [...box.children].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { el: label(el), left: half(r.left - b.left), right: half(b.right - r.right) };
+    });
+  };
+
+  // Vertical and horizontal gap from each matched element to the next one, in document order.
+  const gaps = (sel) => {
+    const els = all(sel);
+    const rs = els.map((el) => el.getBoundingClientRect());
+    return rs.slice(1).map((r, i) => ({
+      from: label(els[i]),
+      to: label(els[i + 1]),
+      y: half(r.top - rs[i].bottom),
+      x: half(r.left - rs[i].right),
+    }));
+  };
+
+  // Elements whose content is wider than their box, so they scroll or clip sideways.
+  const overflowing = () =>
+    [document.documentElement, ...document.querySelectorAll("body *")]
+      .filter((el) => el.scrollWidth > el.clientWidth + 1 && (el === document.documentElement || getComputedStyle(el).overflowX !== "visible"))
+      .map((el) => ({ el: label(el), scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }));
+
+  // Elements a user can click that are smaller than 24x24 CSS px.
+  const smallTargets = () =>
+    [...document.querySelectorAll('a[href], button, [role="button"], [role="tab"], input, select, [tabindex]:not([tabindex="-1"])')]
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter(({ r }) => r.width > 0 && (r.width < 24 || r.height < 24))
+      .map(({ el, r }) => ({ el: label(el), w: half(r.width), h: half(r.height) }));
+
+  // Height of each matched element. Siblings of one kind in one row return one value.
+  const heights = (sel) => all(sel).map((el) => half(el.getBoundingClientRect().height));
+
+  // Pairs of matched elements whose boxes intersect.
+  const overlaps = (sel) => {
+    const els = all(sel).map((el) => ({ el, r: el.getBoundingClientRect() }));
+    const hits = [];
+    for (let i = 0; i < els.length; i++)
+      for (let j = i + 1; j < els.length; j++) {
+        const [a, b] = [els[i].r, els[j].r];
+        if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom)
+          hits.push([label(els[i].el), label(els[j].el)]);
+      }
+    return hits;
+  };
+
+  // Save the boxes of the matched elements under a name. Take one snapshot, act (open, hover,
+  // toggle) with the browser tool, take a second one, then compare the two names with moved().
+  const snapshot = (sel, name = "last") => {
+    state.snaps[name] = all(sel).map((el) => ({ el, r: el.getBoundingClientRect().toJSON() }));
+    return `${state.snaps[name].length} elements saved as "${name}"`;
+  };
+
+  // Elements in both snapshots whose position or size changed by more than 0.5px. It matches
+  // elements by node, so an element added or removed between the two is skipped.
+  const moved = (before, after) => {
+    const [a, b] = [state.snaps[before], state.snaps[after]];
+    if (!a || !b) throw new Error(`take snapshot(sel, "${before}") and snapshot(sel, "${after}") first`);
+    const byNode = new Map(b.map((s) => [s.el, s.r]));
+    return a
+      .filter((s) => byNode.has(s.el))
+      .map((s) => {
+        const r = byNode.get(s.el);
+        return { el: label(s.el), dx: half(r.left - s.r.left), dy: half(r.top - s.r.top), dw: half(r.width - s.r.width), dh: half(r.height - s.r.height) };
+      })
+      .filter((d) => Math.abs(d.dx) + Math.abs(d.dy) + Math.abs(d.dw) + Math.abs(d.dh) > 0.5);
+  };
+
+  // Block containers with a full border or a shadow inside another such container, at least half
+  // its width. Controls, code blocks and media are skipped. Pass the content area's selector.
+  const nestedBoxes = (sel) => {
+    const root = all(sel)[0];
+    const boxed = (el) => {
+      const s = getComputedStyle(el);
+      const border = ["Top", "Right", "Bottom", "Left"].every((k) => parseFloat(s[`border${k}Width`]) > 0);
+      return !s.display.startsWith("inline") && (border || s.boxShadow !== "none");
+    };
+    const skip = "input, textarea, select, button, [role=button], pre, code, img, video, svg, svg *";
+    return [...root.querySelectorAll("*")]
+      .filter((el) => !el.matches(skip) && boxed(el))
+      .map((el) => {
+        for (let p = el.parentElement; p && p !== document.body; p = p.parentElement)
+          if (boxed(p) && el.getBoundingClientRect().width >= p.getBoundingClientRect().width / 2)
+            return { inner: label(el), outer: label(p) };
+        return null;
+      })
+      .filter(Boolean);
+  };
+
+  // Matched elements that round their corners but draw no whole box: a border on one to three
+  // sides, no fill and no shadow. A row divider with a radius curls at both ends. Run it at rest
+  // and again with each row hovered.
+  const strayCorners = (sel) =>
+    all(sel)
+      .map((el) => {
+        const s = getComputedStyle(el);
+        const radius = Math.max(...["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map((k) => parseFloat(s[`border${k}Radius`]) || 0));
+        const sides = ["Top", "Right", "Bottom", "Left"].filter((k) => parseFloat(s[`border${k}Width`]) > 0 && s[`border${k}Style`] !== "none");
+        // A fill counts only when it differs from the background behind the element.
+        const bg = s.backgroundColor.match(/[\d.]+/g) || [];
+        const opaque = bg.length === 3 || (bg.length === 4 && Number(bg[3]) > 0);
+        const filled = (opaque && s.backgroundColor !== backgroundOf(el.parentElement)) || s.backgroundImage !== "none" || s.boxShadow !== "none";
+        return { el: label(el), radius, sides: sides.map((k) => k.toLowerCase()), filled };
+      })
+      .filter((d) => d.radius > 0 && d.sides.length > 0 && d.sides.length < 4 && !d.filled);
+
+  // WCAG contrast ratio between two "rgb(r, g, b)" strings.
+  const contrast = (fg, bg) => {
+    const lum = (c) => {
+      const [r, g, b] = c.match(/\d+(\.\d+)?/g).slice(0, 3).map((v) => {
+        const s = Number(v) / 255;
+        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+    return Math.round(((a + 0.05) / (b + 0.05)) * 100) / 100;
+  };
+
+  // The first non-transparent background behind an element. It ignores images, gradients and
+  // semi-transparent layers; for text on one of those, sample the pixels from a screenshot.
+  const backgroundOf = (el) => {
+    for (let n = el; n; n = n.parentElement) {
+      const bg = getComputedStyle(n).backgroundColor;
+      if (bg && !/rgba\(.*,\s*0\)$/.test(bg) && bg !== "transparent") return bg;
+    }
+    return getComputedStyle(document.body).backgroundColor;
+  };
+
+  // Text contrast of each matched element against the background behind it.
+  const textContrast = (sel) =>
+    all(sel).map((el) => {
+      const fg = getComputedStyle(el).color;
+      const bg = backgroundOf(el);
+      return { el: label(el), fg, bg, ratio: contrast(fg, bg) };
+    });
+
+  // Layout shift since load. The observer reads buffered entries, so a late paste still counts
+  // the shifts that happened before it.
+  if (!state.observing && "PerformanceObserver" in window) {
+    try {
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries())
+          if (!e.hadRecentInput)
+            state.shifts.push({ value: e.value, sources: (e.sources || []).map((x) => label(x.node)).filter((x) => x !== "null") });
+      }).observe({ type: "layout-shift", buffered: true });
+      state.observing = true;
+    } catch {
+      // This browser does not report layout-shift entries, so layoutShift() returns null.
+    }
+  }
+  // The layout shift total since load, and the elements each shift moved.
+  const layoutShift = () =>
+    state.observing
+      ? { total: Math.round(state.shifts.reduce((a, e) => a + e.value, 0) * 1000) / 1000, sources: [...new Set(state.shifts.flatMap((e) => e.sources))] }
+      : null;
+
+  Object.assign(window, {
+    label, rightEdges, insets, gaps, overflowing, smallTargets, heights, overlaps,
+    snapshot, moved, nestedBoxes, strayCorners, contrast, backgroundOf, textContrast, layoutShift,
+  });
+  return "ux helpers ready: rightEdges insets gaps overflowing smallTargets heights overlaps snapshot moved nestedBoxes strayCorners contrast backgroundOf textContrast layoutShift";
+})();
+
+</script>
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const LINK = '<svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg>';
+const pl = (id) => `<a class="permalink" href="#${id}" aria-label="Permalink to this section">${LINK}</a>`;
+
+// hero callouts: place each reticle and callout on its measured target
+const placeHero = () => {
+  const ins = $(".inspector"); if (!ins) return;
+  const box = ins.getBoundingClientRect();
+  ins.querySelectorAll(".reticle").forEach((r) => {
+    const t = [...ins.querySelectorAll(`[data-t="${r.dataset.for}"]`)];
+    const rs = t.map((e) => e.getBoundingClientRect());
+    const L = Math.min(...rs.map((x) => x.left)) - box.left - 5, T = Math.min(...rs.map((x) => x.top)) - box.top - 5;
+    const R = Math.max(...rs.map((x) => x.right)) - box.left + 5, B = Math.max(...rs.map((x) => x.bottom)) - box.top + 5;
+    Object.assign(r.style, { left: L + "px", top: T + "px", width: R - L + "px", height: B - T + "px" });
+    const c = ins.querySelector(`.callout[data-for="${r.dataset.for}"]`);
+    const below = r.dataset.for === "faint";
+    c.style.left = Math.min(L, box.width - c.offsetWidth - 8) + "px";
+    c.style.top = (below ? B + 10 : T - c.offsetHeight - 10) + "px";
+    c.classList.toggle("below", below);
+  });
+};
+addEventListener("load", placeHero); addEventListener("resize", placeHero); document.fonts && document.fonts.ready.then(placeHero);
+
+// theme toggle
+const themeBtn = $("#theme");
+try { const t = localStorage.getItem("uxq-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+themeBtn.addEventListener("click", () => {
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("uxq-theme", document.documentElement.dataset.theme); } catch {}
+});
+
+// ---------- specimens ----------
+// rel(): a rect relative to the stage, for drawing.
+const rel = (el, stage) => {
+  const r = el.getBoundingClientRect(), s = stage.getBoundingClientRect();
+  return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height, r: r.right - s.left, b: r.bottom - s.top };
+};
+
+const I = (d) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const IC = {
+  home: I('<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'),
+  inbox: I('<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/>'),
+  users: I('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>'),
+  gear: I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'),
+  chart: I('<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/>'),
+  flag: I('<path d="M4 22V4a1 1 0 0 1 1-1h11l-2 4 2 4H5"/>'),
+  clock: I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  check: I('<path d="m5 12 5 5L20 7"/>'),
+  sort: I('<path d="M3 6h18M6 12h12M10 18h4"/>'),
+  filter: I('<path d="M3 5h18l-7 8v6l-4 2v-8z"/>'),
+  x: I('<path d="M6 6l12 12M18 6 6 18"/>'),
+  alert: I('<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>'),
+  send: I('<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>'),
+  refresh: I('<path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/>'),
+  folder: I('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
+};
+const FILES = [["PDF", "#ef4444", "design-review.pdf", "2m ago"], ["CSV", "#10b981", "q3-metrics.csv", "4m ago"], ["MOV", "#8b5cf6", "hover-states.mov", "9m ago"]];
+
+const SPECS = [
+  {
+    id: "hover-gap", rule: "no-cramped-controls", sev: "medium", kinds: "list · control",
+    title: "The hover that glues two rows together",
+    seen: "Seen in: a sidebar where “Home” and “Your requests” merged on hover",
+    why: "At rest only the selected row draws a box, so the 0px gap is invisible. Hover the next row and two boxes touch. A check of the page at rest finds nothing.",
+    surface: "Sidebar nav, “Your requests” hovered under the selected “Home”",
+    fix: "Give the list <code>gap: 2px</code>, so every boxed state keeps a seam.",
+    html: `<div class="ui"><div class="eyebrow-u" style="padding:0 10px 8px">Workspace</div><div class="side"><a class="item selected">${IC.home}Home</a><a class="item">${IC.inbox}Your requests<span class="cnt">4</span></a><a class="item">${IC.users}Teams</a><a class="item">${IC.gear}Settings</a></div></div>`,
+    async check(stage, fixed) {
+      const items = stage.querySelectorAll(".item");
+      items[1].classList.add("sim-hover");
+      await sleep(60);
+      const g = gaps(`#${stage.id} .item`)[0];
+      const a = rel(items[0], stage), b = rel(items[1], stage);
+      const y = (a.b + b.y) / 2, bad = g.y <= 0;
+      return {
+        pass: !bad,
+        evidence: `gaps(".item") with row 2 hovered\n→ { from: "Home", to: "Your requests", y: ${g.y} }`,
+        ann: bad
+          ? [{ box: { x: a.x - 4, y: a.y - 4, w: a.w + 8, h: b.b - a.y + 8 }, tone: "bad" }, { line: [a.x - 14, y, a.r + 14, y], tone: "bad" }, { label: `${g.y}px gap`, x: a.r + 18, y: y - 12, tone: "bad" }]
+          : [{ line: [a.x - 14, y, a.r + 14, y], tone: "good" }, { label: `${g.y}px gap ✓`, x: a.r + 18, y: y - 12, tone: "good" }],
+      };
+    },
+    reset(stage) { stage.querySelectorAll(".sim-hover").forEach((e) => e.classList.remove("sim-hover")); },
+  },
+  {
+    id: "menu-shift", rule: "no-interaction-shift", sev: "medium", kinds: "overlay · control",
+    title: "The menu that shoves the page down",
+    seen: "Seen in: bug bash notes on menus and banners that push content",
+    why: "The Sort menu renders in the page flow. Opening it moves the card under the pointer, so the next click lands on the wrong thing.",
+    surface: "Requests page, Sort button and its menu",
+    fix: "Float the menu: <code>position: absolute</code> under the button, in a <code>position: relative</code> toolbar.",
+    html: `<div class="ui"><h5>Requests</h5><div class="tbwrap"><div class="tb"><button class="sort">${IC.sort}Sort</button><button>${IC.filter}Filter</button></div><div class="menu"><div>${IC.check}Newest<kbd>N</kbd></div><div>${IC.check}Oldest<kbd>O</kbd></div><div>${IC.check}Most comments<kbd>C</kbd></div></div></div><div class="card-ui summary" style="margin-top:12px"><span class="ic">${IC.inbox}</span><div><b>3 open requests</b><div class="muted">Updated 2 minutes ago</div></div></div></div>`,
+    async check(stage, fixed) {
+      const sel = `#${stage.id} .summary`;
+      snapshot(sel, stage.id + "-before");
+      const before = rel(stage.querySelector(".summary"), stage);
+      stage.querySelector(".menu").classList.add("open");
+      await sleep(60);
+      snapshot(sel, stage.id + "-after");
+      const m = moved(stage.id + "-before", stage.id + "-after");
+      const after = rel(stage.querySelector(".summary"), stage);
+      const dy = m[0] ? m[0].dy : 0;
+      if (dy > 0) return {
+        pass: false,
+        evidence: `snapshot → open Sort → snapshot\nmoved("before", "after")\n→ [{ el: "div.summary", dx: 0, dy: ${dy} }]`,
+        ann: [{ ghost: before }, { box: { x: after.x - 3, y: after.y - 3, w: after.w + 6, h: after.h + 6 }, tone: "bad" }, { line: [after.r - 30, before.y, after.r - 30, after.y], tone: "bad", arrow: true }, { label: `↓ ${dy}px`, x: after.r - 92, y: before.y + (after.y - before.y) / 2 - 12, tone: "bad" }],
+      };
+      return { pass: true, evidence: `moved("before", "after")\n→ []   // nothing moved`, ann: [{ box: { x: after.x - 3, y: after.y - 3, w: after.w + 6, h: after.h + 6 }, tone: "good" }, { label: "0px moved ✓", x: after.r - 120, y: after.b + 8, tone: "good" }] };
+    },
+    reset(stage) { stage.querySelector(".menu").classList.remove("open"); },
+  },
+  {
+    id: "gutter", rule: "consistent-gutters", sev: "medium", kinds: "layout",
+    title: "The banner with no gutter",
+    seen: "Seen in: a global announcement card flush against the sidebar",
+    why: "Every block in the content area sits 24px in, except the banner, which bleeds to the divider. In a screenshot it looks almost right, and a reviewer reads past it.",
+    surface: "Dashboard, global announcement banner",
+    fix: "Drop the negative margin. Let the banner use the content area's inset like its siblings.",
+    html: `<div class="ui ui-frame"><div class="nav"><div class="brandu"><i></i>Acme</div><div class="item selected">${IC.chart}Overview</div><div class="item">${IC.flag}Flags</div><div class="item">${IC.clock}Audit log</div></div><div class="content"><h5>Overview</h5><div class="psa"><span class="pill">Notice</span>Maintenance Friday 10:00–11:00. Writes pause.</div><div class="card-ui"><span class="ic">${IC.flag}</span><div><div class="kpi">12</div><div class="muted">flags changed this week</div></div></div><div class="card-ui"><span class="ic">${IC.clock}</span><div><div class="kpi">3</div><div class="muted">reviews waiting</div></div></div></div></div>`,
+    async check(stage) {
+      const ins = insets(`#${stage.id} .content`);
+      const kids = [...stage.querySelectorAll(".content > *")];
+      const ps = ins[1], ref = ins[2];
+      const bad = ps.left !== ref.left;
+      const c = rel(stage.querySelector(".content"), stage);
+      const ann = kids.map((k, i) => {
+        const r = rel(k, stage), isBad = bad && i === 1;
+        return [{ line: [c.x, r.y + r.h / 2, r.x, r.y + r.h / 2], tone: isBad ? "bad" : "good" }, ...(i === 1 ? [{ label: `left: ${ins[i].left}px`, x: r.x + 8, y: r.b + 6, tone: isBad ? "bad" : "good" }] : [])];
+      }).flat();
+      if (bad) ann.push({ box: { x: rel(kids[1], stage).x - 2, y: rel(kids[1], stage).y - 3, w: rel(kids[1], stage).w + 5, h: rel(kids[1], stage).h + 6 }, tone: "bad" });
+      return {
+        pass: !bad,
+        evidence: `insets(".content")\n→ h5 ${ins[0].left}px · banner ${ps.left}px · card ${ref.left}px · card ${ins[3].left}px`,
+        ann,
+      };
+    },
+  },
+  {
+    id: "columns", rule: "columns-align", sev: "medium", kinds: "list",
+    title: "The count that drifts out of its column",
+    seen: "Seen in: sidebar author counts in a code review tool",
+    why: "Rows that can be hidden render a hide button. The last row cannot, so its count slides 32px right. One column, two right edges.",
+    surface: "Stack sidebar, author filter list",
+    fix: "Render the action slot in every row at a fixed width, or overlay the action on hover.",
+    html: `<div class="ui"><div class="eyebrow-u" style="padding:0 8px 8px">Authors</div><div class="rows"><div class="rrow"><span class="av" style="background:#f97316">AS</span><span class="nm">Ana Silva</span><span class="ct">12</span><button class="hide" aria-label="Hide Ana Silva">${IC.x}</button></div><div class="rrow"><span class="av" style="background:#0ea5e9">KM</span><span class="nm">Kenji Mori</span><span class="ct">7</span><button class="hide" aria-label="Hide Kenji Mori">${IC.x}</button></div><div class="rrow"><span class="av" style="background:#8b5cf6">ME</span><span class="nm">You</span><span class="ct">4</span><span class="slot buggy-none"></span></div></div></div>`,
+    async check(stage) {
+      const s = stage.getBoundingClientRect().left;
+      const edges = rightEdges(`#${stage.id} .ct`).map((x) => Math.round(x - s));
+      const bad = new Set(edges).size > 1;
+      const cts = [...stage.querySelectorAll(".ct")].map((e) => rel(e, stage));
+      const top = cts[0].y - 10, bot = cts[cts.length - 1].b + 10;
+      const ann = [...new Set(edges)].map((x) => ({ line: [x, top, x, bot], tone: bad ? "bad" : "good" }));
+      ann.push({ label: bad ? `right edges: ${edges.join(", ")}` : `one right edge: ${edges[0]} ✓`, x: Math.max(...edges) + 14, y: top + 4, tone: bad ? "bad" : "good" });
+      return { pass: !bad, evidence: `rightEdges(".ct")  // relative to the list\n→ [${edges.join(", ")}]`, ann };
+    },
+  },
+  {
+    id: "double-write", rule: "pending-write", sev: "high", kinds: "write",
+    title: "The button that writes twice",
+    seen: "Seen in: “Add me” and expiry buttons with no pending state",
+    why: "The Save button looks the same while its request runs. A second click, or a double click, posts the comment twice.",
+    surface: "Request page, comment form, Save",
+    fix: "Use the repo's async button: it disables itself and shows a spinner while the write runs.",
+    html: `<div class="ui"><div class="composer"><textarea aria-label="Comment">Looks good to me. Ship it.</textarea><div class="bar"><span class="muted">Markdown supported</span><span class="sp"></span><button class="btn-ui save">${IC.send}Save</button></div></div><div class="log" aria-label="Requests sent"><span class="muted" style="color:#6b6f7b">// network</span></div></div>`,
+    setup(stage, fixed) {
+      const btn = stage.querySelector(".save"), log = stage.querySelector(".log");
+      btn.onclick = async () => {
+        if (fixed && btn.disabled) return;
+        const n = log.children.length + 1;
+        const line = document.createElement("span"); line.className = "req"; line.innerHTML = `<span class="m">POST</span><span>/api/comments</span><span class="wait">pending</span>`; log.append(line);
+        if (fixed) { btn.disabled = true; btn.setAttribute("aria-busy", "true"); btn.innerHTML = '<span class="spinner"></span>Saving'; }
+        await sleep(700);
+        line.lastChild.className = "ok"; line.lastChild.textContent = `201 · #${n}`;
+        if (fixed) { btn.disabled = false; btn.removeAttribute("aria-busy"); btn.innerHTML = `${IC.send}Save`; }
+      };
+    },
+    async check(stage) {
+      const btn = stage.querySelector(".save"), log = stage.querySelector(".log");
+      log.innerHTML = "";
+      btn.click(); await sleep(90); btn.click();
+      await sleep(820);
+      const n = log.querySelectorAll(".req").length;
+      const r = rel(log, stage);
+      return {
+        pass: n === 1,
+        evidence: `double-click Save, count requests\n→ ${n} × POST /comments${n > 1 ? "   // duplicate comment" : ""}`,
+        ann: [{ box: { x: r.x - 3, y: r.y - 3, w: r.w + 6, h: r.h + 6 }, tone: n > 1 ? "bad" : "good" }, { label: n > 1 ? `${n} writes from 1 intent` : "1 write ✓", x: r.r - (n > 1 ? 178 : 84), y: r.y - 28, tone: n > 1 ? "bad" : "good" }],
+      };
+    },
+    reset(stage) { stage.querySelector(".log").innerHTML = ""; },
+  },
+  {
+    id: "lost-input", rule: "keep-user-input", sev: "high", kinds: "form · write",
+    title: "The failed save that eats your words",
+    seen: "Seen in: a chat box that cleared the message after a failed send",
+    why: "The error handler clears the field before it shows the error. The user wrote a paragraph, the server said 500, and the paragraph is gone.",
+    surface: "Review page, comment form, Save after a server error",
+    fix: "Clear the text only on success. On failure, keep it and say what failed.",
+    html: `<div class="ui"><div class="composer"><textarea class="ta" aria-label="Comment" placeholder="Leave a comment…"></textarea><div class="bar"><span class="muted">This demo's server answers 500</span><span class="sp"></span><button class="btn-ui save">${IC.send}Save</button></div></div><p class="err" hidden></p></div>`,
+    setup(stage, fixed) {
+      const ta = stage.querySelector(".ta"), btn = stage.querySelector(".save"), err = stage.querySelector(".err");
+      btn.onclick = async () => {
+        btn.disabled = true; await sleep(350); btn.disabled = false;
+        if (!fixed) { ta.value = ""; err.innerHTML = `${IC.alert}<span>Something went wrong</span>`; }
+        else err.innerHTML = `${IC.alert}<span>Could not save the comment: the server answered 500. Your text is kept, so try again.</span>`;
+        err.hidden = false;
+      };
+    },
+    async check(stage) {
+      const ta = stage.querySelector(".ta"), err = stage.querySelector(".err");
+      err.hidden = true; ta.value = "";
+      const text = "The retry copy reads well. One nit on the empty state.";
+      for (const ch of text) { ta.value += ch; await sleep(14); }
+      const before = ta.value.length;
+      stage.querySelector(".save").click();
+      await sleep(480);
+      const after = ta.value.length;
+      const r = rel(ta, stage);
+      return {
+        pass: after === before,
+        evidence: `type ${before} chars → Save → server 500\n→ textarea: ${before} chars before, ${after} after`,
+        ann: [{ box: { x: r.x - 3, y: r.y - 3, w: r.w + 6, h: r.h + 6 }, tone: after < before ? "bad" : "good" }, { label: after < before ? `${before} → ${after} chars` : `${after} chars kept ✓`, x: r.r - 150, y: r.b - 32, tone: after < before ? "bad" : "good" }],
+      };
+    },
+  },
+  {
+    id: "loading", rule: "loading-is-not-empty", sev: "medium", kinds: "data",
+    title: "“No results”… then results",
+    seen: "Seen in: an upload list that said “No results” while it loaded",
+    why: "The empty check runs before the loading check. For a second, the user is told they have nothing, and some leave before the data arrives.",
+    surface: "Uploads page, recent uploads list, first load",
+    fix: "Check the loading flag first, and render a skeleton shaped like the list.",
+    html: `<div class="ui"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h5>Recent uploads</h5><button class="bt reload">${IC.refresh}Reload</button></div><div class="list"></div></div>`,
+    setup(stage, fixed) {
+      const list = stage.querySelector(".list");
+      const done = () => { list.innerHTML = FILES.map(([t, c, n, a]) => `<div class="li"><span class="ft" style="background:${c}">${t}</span><span class="nm">${n}</span><span class="muted">${a}</span></div>`).join(""); };
+      const load = async (hold = 900) => {
+        list.innerHTML = fixed ? [55, 40, 48].map((w) => `<div class="li"><span class="ft sk" style="height:22px"></span><div class="sk" style="width:${w}%"></div></div>`).join("") : `<div class="empty">${IC.folder}<span>No results</span></div>`;
+        await sleep(hold); done();
+      };
+      stage.__load = load;
+      stage.querySelector(".reload").onclick = () => load();
+      done();
+    },
+    async check(stage) {
+      const p = stage.__load(2300);
+      await sleep(120);
+      const txt = stage.querySelector(".list").innerText.trim();
+      const r = rel(stage.querySelector(".list"), stage);
+      const bad = /no results/i.test(txt);
+      setTimeout(() => {}, 0);
+      p.then(() => {});
+      return {
+        pass: !bad,
+        evidence: `reload, read the list at t = 0.1 s, data pending\n→ ${bad ? `"${txt}"   // the empty state` : "3 skeleton rows, no empty text"}`,
+        ann: [{ box: { x: r.x - 3, y: r.y - 3, w: r.w + 6, h: r.h + 6 }, tone: bad ? "bad" : "good" }, { label: bad ? "empty state while loading" : "skeleton while loading ✓", x: r.x + 10, y: r.b - 34, tone: bad ? "bad" : "good" }],
+      };
+    },
+  },
+  {
+    id: "contrast", rule: "theme-contrast", sev: "high", kinds: "style",
+    title: "The label that disappears in dark mode",
+    seen: "Seen in: contrast fixes after a dark theme landed",
+    why: "The muted gray was picked on a white canvas. On the dark card it measures 2.2 : 1, far under the 4.5 : 1 that body text needs.",
+    surface: "Activity feed, dark theme, card metadata",
+    fix: "Take the muted color from the theme's token, which keeps 4.5 : 1 on both canvases.",
+    html: `<div class="ui ui-dark" style="min-height:260px;display:flex;flex-direction:column;gap:10px;justify-content:center"><div class="tile"><div class="t"><span class="dot"></span>Rollout reached 50%</div><div class="meta">Updated 4 minutes ago by the release bot</div><div class="bar2"><b></b></div></div><div class="tile"><div class="t"><span class="dot amber"></span>Experiment paused</div><div class="meta">Paused 1 hour ago · guardrail hit</div></div></div>`,
+    async check(stage) {
+      const res = textContrast(`#${stage.id} .meta`);
+      const r = rel(stage.querySelector(".meta"), stage);
+      const ratio = res[0].ratio, bad = ratio < 4.5;
+      return {
+        pass: !bad,
+        evidence: `textContrast(".meta")\n→ { fg: "${res[0].fg}", bg: "${res[0].bg}", ratio: ${ratio} }`,
+        ann: [{ box: { x: r.x - 4, y: r.y - 3, w: r.w + 8, h: r.h + 6 }, tone: bad ? "bad" : "good" }, { label: `${ratio} : 1 ${bad ? "< 4.5" : "✓"}`, x: r.x, y: r.b + 8, tone: bad ? "bad" : "good" }],
+      };
+    },
+  },
+  {
+    id: "corners", rule: "no-stray-corners", sev: "low", kinds: "list · style",
+    title: "The divider that curls at both ends",
+    seen: "Seen in: a team directory whose rows were rounded for their hover fill",
+    why: "Each row rounds its corners for the hover fill, but it also draws the divider. When a row is not hovered, its divider curls up into two small arcs and stops short of the edge. Nobody designed that state, so nobody looked at it.",
+    surface: "Team directory, row dividers at rest",
+    fix: "Keep the divider square. Put the radius on the hover fill only.",
+    html: `<div class="ui"><div class="tlist">${[["DS", "#dcfce7", "#15803d", "Design System", "Tokens and components", "4 open"], ["BL", "#dbeafe", "#1d4ed8", "Billing", "Invoices and refunds", "23 open"], ["NT", "#fce7f3", "#be185d", "Notifications", "Email and push", "8 open"], ["DX", "#ede9fe", "#6d28d9", "Developer Experience", "CI and tooling", "4 open"]].map(([a, bg, fg, n, d, r]) => `<div class="trow"><span class="tav" style="background:${bg};color:${fg}">${a}</span><div><div class="tn">${n}</div><div class="td">${d}</div></div><div class="tr">${r}</div></div>`).join("")}</div></div>`,
+    async check(stage) {
+      const rows = [...stage.querySelectorAll(".trow")];
+      const rest = strayCorners(`#${stage.id} .trow`);
+      rows[1].classList.add("sim-hover"); await sleep(40);
+      const hov = strayCorners(`#${stage.id} .trow`);
+      rows[1].classList.remove("sim-hover"); await sleep(40);
+      const bad = rest.length > 0 || hov.length > 0;
+      const ann = [];
+      if (bad) {
+        rows.slice(1).forEach((row) => {
+          const r = rel(row, stage);
+          ann.push({ box: { x: r.x - 3, y: r.y - 5, w: 18, h: 18 }, tone: "bad" }, { box: { x: r.r - 15, y: r.y - 5, w: 18, h: 18 }, tone: "bad" });
+        });
+        const r2 = rel(rows[2], stage);
+        ann.push({ label: `${rest.length} rows: radius ${rest[0].radius}px on a top border`, x: r2.x + 40, y: r2.y - 12, tone: "bad" });
+      } else {
+        const r2 = rel(rows[2], stage);
+        ann.push({ label: "square dividers ✓", x: r2.x + 40, y: r2.y - 12, tone: "good" });
+      }
+      return {
+        pass: !bad,
+        evidence: `strayCorners(".trow") at rest\n→ ${rest.length ? `${rest.length} × { radius: ${rest[0].radius}, sides: ["top"], filled: false }` : "[]"}\nwith row 2 hovered → ${hov.length ? hov.length + " matches" : "[]"}`,
+        ann,
+      };
+    },
+  },
+  {
+    id: "toggle", rule: "toggle-stays-put", sev: "medium", kinds: "control · layout",
+    title: "The toggle that runs away",
+    seen: "Seen in: filter and view toggles that moved after a click",
+    why: "Show filters inserts the chips before the button and flips the list to two columns. The toggle jumps away from the pointer, so the user has to hunt for it to undo, and loses their place in the list.",
+    surface: "Issues page, Show filters toggle",
+    fix: "Render the toggle once, in a fixed-width slot. Open the chips below the toolbar, and leave the list layout alone.",
+    html: `<div class="ui"><div class="tbar"><h5>Issues</h5><span class="sp"></span><button class="bt tgl" aria-pressed="false">${IC.filter}<span class="lbl">Show filters</span></button></div><div class="grid">${["Fix flaky login test", "Hover gap in sidebar", "Sort menu shifts card", "Dark mode contrast"].map((t, i) => `<div class="iss"><span class="st${i % 2 ? " ip" : ""}"></span><span class="id">UX-${41 + i}</span>${t}</div>`).join("")}</div></div>`,
+    setup(stage, fixed) {
+      const btn = stage.querySelector(".tgl"), bar = stage.querySelector(".tbar"), grid = stage.querySelector(".grid");
+      btn.onclick = () => {
+        const on = btn.getAttribute("aria-pressed") !== "true";
+        btn.setAttribute("aria-pressed", String(on));
+        btn.querySelector(".lbl").textContent = on ? (fixed ? "Hide filters" : "Hide all filters") : "Show filters";
+        stage.querySelectorAll(".chipsu").forEach((e) => e.remove());
+        if (on) {
+          const chips = document.createElement("div"); chips.className = "chipsu";
+          chips.innerHTML = ["Status: open", "Assignee: me", "Label: ux", "Updated: 7d"].map((c) => `<span class="chipu">${c}</span>`).join("");
+          if (fixed) bar.after(chips); else bar.insertBefore(chips, btn);
+        }
+        if (!fixed) grid.classList.toggle("two", on);
+      };
+    },
+    async check(stage) {
+      const sel = `#${stage.id} .tgl, #${stage.id} .grid`;
+      const btn = stage.querySelector(".tgl");
+      const before = rel(btn, stage);
+      snapshot(sel, stage.id + "-a");
+      const cols0 = getComputedStyle(stage.querySelector(".grid")).gridTemplateColumns.split(" ").length;
+      btn.click(); await sleep(60);
+      snapshot(sel, stage.id + "-b");
+      const m = moved(stage.id + "-a", stage.id + "-b");
+      const after = rel(btn, stage);
+      const cols1 = getComputedStyle(stage.querySelector(".grid")).gridTemplateColumns.split(" ").length;
+      const t = m.find((d) => d.el.includes("tgl")) || { dx: 0, dy: 0, dw: 0 };
+      const bad = t.dx || t.dy || t.dw || cols0 !== cols1;
+      const cx = (r) => [r.x + r.w / 2, r.y + r.h / 2];
+      if (bad) return {
+        pass: false,
+        evidence: `snapshot → click "Show filters" → snapshot\nmoved("a", "b") → [{ el: "button.tgl", dx: ${t.dx}, dy: ${t.dy}, dw: ${t.dw} }]\nlist columns: ${cols0} → ${cols1}`,
+        ann: [{ ghost: before }, { box: { x: after.x - 3, y: after.y - 3, w: after.w + 6, h: after.h + 6 }, tone: "bad" }, { line: [...cx(before), ...cx(after)], tone: "bad", arrow: true }, { label: `toggle moved ${Math.round(Math.hypot(t.dx, t.dy))}px`, x: after.r + 10, y: after.y + 4, tone: "bad" }],
+      };
+      return { pass: true, evidence: `moved("a", "b") → []   // the toggle stayed\nlist columns: ${cols0} → ${cols1}`, ann: [{ box: { x: after.x - 3, y: after.y - 3, w: after.w + 6, h: after.h + 6 }, tone: "good" }, { label: "0px moved ✓", x: after.x - 104, y: after.y + 6, tone: "good" }] };
+    },
+  },
+];
+
+const ns = "http://www.w3.org/2000/svg";
+function draw(wrap, stage, ann) {
+  const svg = wrap.querySelector(".overlay");
+  svg.innerHTML = '<defs><marker id="ah-' + stage.id + '" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--bad)"/></marker></defs>';
+  wrap.querySelectorAll(".ann-label").forEach((e) => e.remove());
+  const s = stage.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+  const ox = s.left - w.left, oy = s.top - w.top;
+  for (const a of ann) {
+    if (a.line) {
+      const [x1, y1, x2, y2] = a.line;
+      const l = document.createElementNS(ns, "line");
+      Object.entries({ x1: x1 + ox, y1: y1 + oy, x2: x2 + ox, y2: y2 + oy }).forEach(([k, v]) => l.setAttribute(k, v));
+      l.setAttribute("class", `ann-line tone-${a.tone}`);
+      if (a.arrow) { l.setAttribute("marker-end", `url(#ah-${stage.id})`); l.setAttribute("marker-start", `url(#ah-${stage.id})`); }
+      svg.append(l);
+    } else if (a.box || a.ghost) {
+      const b = a.box || a.ghost;
+      const r = document.createElementNS(ns, "rect");
+      Object.entries({ x: b.x + ox, y: b.y + oy, width: b.w, height: b.h, rx: 7 }).forEach(([k, v]) => r.setAttribute(k, v));
+      r.setAttribute("class", a.ghost ? "ann-ghost tone-bad" : `ann-box tone-${a.tone}`);
+      svg.append(r);
+    } else if (a.label) {
+      const d = document.createElement("span");
+      d.className = `ann-label ${a.tone}`; d.textContent = a.label;
+      d.style.left = Math.max(4, Math.min(a.x + ox, w.width - 8 - a.label.length * 7.4)) + "px"; d.style.top = a.y + oy + "px";
+      wrap.append(d);
+    }
+  }
+}
+
+async function typeInto(el, text) {
+  el.textContent = ""; el.classList.add("caret");
+  const lines = text.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    if (i) el.append(document.createElement("br"));
+    const span = document.createElement("span"); el.append(span);
+    for (const ch of lines[i]) { span.textContent += ch; await sleep(document.body.classList.contains("tour") ? 9 : 6); }
+  }
+  el.classList.remove("caret");
+}
+
+const specsEl = $("#specs");
+SPECS.forEach((sp, i) => {
+  const el = document.createElement("article");
+  el.className = "spec"; el.id = "bug-" + sp.id; el.dataset.spec = sp.id;
+  el.innerHTML = `
+    <div class="spec-left">
+      <div class="spec-head"><div><div class="num">BUG ${String(i + 1).padStart(2, "0")} · ${sp.kinds}</div></div>
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Version"><button aria-pressed="true" data-v="buggy">Buggy</button><button aria-pressed="false" data-v="fixed">Fixed</button></div>
+          <button class="run"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg><span>Run check</span></button>
+        </div></div>
+      <div class="stage-wrap"><div class="stage" id="st-${sp.id}">${sp.html}</div><svg class="overlay"></svg><div class="scan"></div></div>
+    </div>
+    <div class="spec-right">
+      <div><h3 id="${sp.id}">${sp.title}${pl(sp.id)}</h3><div class="seen">${sp.seen}</div></div>
+      <p class="why">${sp.why}</p>
+      <div class="finding">
+        <div class="fh"><span class="sev idle">Not run</span><span class="ftitle">Finding</span><span class="rule-chip">${sp.rule}</span></div>
+        <dl><dt>Surface</dt><dd>${sp.surface}</dd><dt>Evidence</dt><dd class="ev"><span class="placeholder">Press Run check to measure the mini-app.</span></dd><dt>Fix</dt><dd>${sp.fix}</dd></dl>
+      </div>
+    </div>`;
+  specsEl.append(el);
+  const stage = el.querySelector(".stage"), wrap = el.querySelector(".stage-wrap");
+  let fixed = false, busy = false;
+  const apply = () => {
+    el.classList.toggle("fixed", fixed);
+    stage.innerHTML = sp.html;
+    if (fixed && sp.id === "columns") stage.querySelector(".slot").replaceWith(Object.assign(document.createElement("span"), { className: "slot" }));
+    if (!fixed && sp.id === "columns") stage.querySelector(".slot").remove();
+    sp.setup && sp.setup(stage, fixed);
+    draw(wrap, stage, []);
+    const sev = el.querySelector(".sev"); sev.className = "sev idle"; sev.textContent = "Not run";
+    el.querySelector(".ev").innerHTML = '<span class="placeholder">Press Run check to measure the mini-app.</span>';
+  };
+  apply();
+  el.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+    if (busy) return;
+    fixed = b.dataset.v === "fixed";
+    el.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    apply();
+  }));
+  const run = el.querySelector(".run");
+  run.addEventListener("click", async () => {
+    if (busy) return; busy = true;
+    run.setAttribute("aria-busy", "true"); run.querySelector("span").textContent = "Measuring…";
+    sp.reset && sp.reset(stage); draw(wrap, stage, []);
+    (window.__sfx = window.__sfx || []).push({ t: Date.now() / 1000, type: "scan" });
+    wrap.classList.remove("scanning"); void wrap.offsetWidth; wrap.classList.add("scanning");
+    await sleep(420);
+    const res = await sp.check(stage, fixed);
+    draw(wrap, stage, res.ann);
+    window.__sfx.push({ t: Date.now() / 1000, type: res.pass ? "pass" : "fail" });
+    const sev = el.querySelector(".sev");
+    sev.className = "sev " + (res.pass ? "pass" : sp.sev); sev.textContent = res.pass ? "Pass" : sp.sev;
+    await typeInto(el.querySelector(".ev"), res.evidence);
+    run.removeAttribute("aria-busy"); run.querySelector("span").textContent = "Run again";
+    busy = false;
+  });
+});
+
+// headings permalinks
+document.querySelectorAll("h2[id]").forEach((h) => { h.innerHTML = h.innerHTML.replace(/<!--PL:[a-z]+-->/, "") + pl(h.id); });
+
+// ---------- tour mode for the video ----------
+window.__tour = {
+  cap(text, small) { const c = $("#cap"); c.innerHTML = text + (small ? `<small>${small}</small>` : ""); c.classList.add("on"); },
+  // Show a narration line one sentence at a time, each for a share of the clip by its length.
+  capLine(text, seconds) {
+    clearTimeout(window.__capT);
+    const parts = text.match(/[^.!?]+[.!?]+/g) || [text];
+    const total = parts.reduce((a, p) => a + p.length, 0);
+    let t = 0;
+    parts.forEach((p) => { const at = t; window.__capT = setTimeout(() => window.__tour.cap(p.trim()), at * 1000); t += (p.length / total) * seconds; });
+  },
+  capOff() { $("#cap").classList.remove("on"); },
+  card(html) { const c = $("#card"); c.innerHTML = `<div>${html}</div>`; c.classList.add("on"); },
+  cardOff() { $("#card").classList.remove("on"); },
+  cursor(x, y) { $("#cursor").style.transform = `translate(${x}px, ${y}px)`; },
+};
+if (new URLSearchParams(location.search).has("tour")) document.body.classList.add("tour");
+})();
+</script>
+</body>
+</html>

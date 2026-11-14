@@ -191,9 +191,37 @@
       ? { total: Math.round(state.shifts.reduce((a, e) => a + e.value, 0) * 1000) / 1000, sources: [...new Set(state.shifts.flatMap((e) => e.sources))] }
       : null;
 
+  // Text that does not fit its own control or box. A native <select> or <input> clips its value
+  // inside the control, so scrollWidth stays equal to clientWidth and overflowing() misses it.
+  // This measures the shown text with the control's font against the width inside its padding.
+  // Other matched elements count when they clip text: scrollWidth larger than clientWidth with
+  // overflow other than visible (an ellipsis, or a hidden overflow).
+  const clippedText = (sel = "select, input, textarea, button, a, [role=button], [role=tab], td, th, li, span") => {
+    const ctx = document.createElement("canvas").getContext("2d");
+    // Inputs that draw their own value (a date picker, a file name, a swatch) are skipped.
+    const ownValue = "input[type=checkbox], input[type=radio], input[type=range], input[type=color], input[type=hidden], " +
+      "input[type=file], input[type=date], input[type=time], input[type=datetime-local], input[type=month], input[type=week]";
+    return all(sel)
+      .map((el) => {
+        const s = getComputedStyle(el);
+        if (s.display === "none" || s.visibility === "hidden") return null;
+        const inner = el.clientWidth - parseFloat(s.paddingLeft) - parseFloat(s.paddingRight);
+        if (el.matches("select, input")) {
+          if (el.matches(ownValue)) return null;
+          const text = el.matches("select") ? el.selectedOptions[0]?.text || "" : el.value || el.placeholder || "";
+          ctx.font = s.font || `${s.fontStyle} ${s.fontWeight} ${s.fontSize} ${s.fontFamily}`;
+          const need = half(ctx.measureText(text).width);
+          return need > inner + 1 ? { el: label(el), text: text.slice(0, 40), need, have: half(inner) } : null;
+        }
+        const clips = s.overflowX !== "visible" && el.scrollWidth > el.clientWidth + 1 && (el.textContent || "").trim();
+        return clips ? { el: label(el), text: el.textContent.trim().replace(/\s+/g, " ").slice(0, 40), need: el.scrollWidth, have: el.clientWidth } : null;
+      })
+      .filter(Boolean);
+  };
+
   Object.assign(window, {
     label, rightEdges, insets, gaps, overflowing, smallTargets, heights, overlaps,
-    snapshot, moved, nestedBoxes, strayCorners, contrast, backgroundOf, textContrast, layoutShift,
+    snapshot, moved, nestedBoxes, strayCorners, contrast, backgroundOf, textContrast, layoutShift, clippedText,
   });
-  return "ux helpers ready: rightEdges insets gaps overflowing smallTargets heights overlaps snapshot moved nestedBoxes strayCorners contrast backgroundOf textContrast layoutShift";
+  return "ux helpers ready: rightEdges insets gaps overflowing smallTargets heights overlaps snapshot moved nestedBoxes strayCorners contrast backgroundOf textContrast layoutShift clippedText";
 })();

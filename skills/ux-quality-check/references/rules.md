@@ -104,6 +104,7 @@ file again after each load or navigation.
 | `nestedBoxes(sel)` | Bordered or shadowed blocks inside another one, in the first match |
 | `strayCorners(sel)` | Matches with a corner radius but a border on only one to three sides, and no fill or shadow |
 | `textContrast(sel)` | The text color, background and WCAG ratio of each match |
+| `clippedText(sel)` | Matches whose text is wider than its space: a `<select>` or `<input>` value wider than the control, or an element that clips its text |
 | `contrast(fg, bg)` | The WCAG ratio of two `rgb()` strings |
 | `backgroundOf(el)` | The first opaque background behind an element |
 | `layoutShift()` | The layout shift total since load and the elements it moved, or `null` where the browser does not report shifts |
@@ -521,8 +522,9 @@ Look for `overflow: hidden` with a `line-height` below 1.2. Check that a title n
 `min-width: 0` and the actions have `flex-shrink: 0`.
 
 **Check in the browser.** At each supported width, find buttons, pills, dates and header cells
-whose height is larger than one line (two for a header). Hover each truncated text and read the
-tooltip. Set a title to 200 characters and check that the row's controls stay inside the row.
+whose height is larger than one line (two for a header). Run `clippedText()` at each width. It
+reports a `<select>` or `<input>` whose value is wider than the control, which `overflowing()`
+misses. Hover each truncated text and read the tooltip. Set a title to 200 characters and check that the row's controls stay inside the row.
 Zoom a screenshot on truncated text with descenders.
 
 **Fix.** Set `nowrap` on short values and wrap on prose. Truncate long values with a tooltip of

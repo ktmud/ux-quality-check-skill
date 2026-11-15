@@ -572,7 +572,7 @@ that every offset reads.
 **Rule.** An action on one element moves or resizes nothing above it or beside it. Content that
 the action inserts in the flow (an expanded row, an accordion, "show more") may push the content below it.
 These actions move nothing at all: opening a menu, popover or tooltip; hovering or focusing a
-row; switching the tabs of one panel (Write and Preview); showing a notice strip in one pane of a
+row or a control, which can show a hint; switching the tabs of one panel (Write and Preview); showing a notice strip in one pane of a
 multi-pane layout. A panel keeps one height across its tabs. A drawer that opens beside a list
 leaves the list's text wrap as it was, or drops low-priority columns.
 
@@ -587,7 +587,9 @@ or `fixed`. Look for hover, focus or toggle rules that change `display`, `height
 `margin` or `border-width`. Look for tab panels with no shared `min-height`, and a notice strip
 rendered inside one pane's column of a shared grid. Look for expandable items in a grid or flex row
 that stretches its items (`align-items: stretch`, the default), where an open item stretches its
-row neighbors.
+row neighbors. Look for help text, hints or errors that render in the flow from hover or focus
+state (`{hovered && <p>…</p>}`, `onMouseEnter` that sets state), most of all inside a flex or grid
+row of buttons, where the text widens its cell and the row rewraps.
 
 **Check in the browser.** Run `snapshot(sel, "before")` on the surface's main blocks and on the
 siblings of the element. Do the action, run `snapshot(sel, "after")`, and compare with
@@ -595,7 +597,8 @@ siblings of the element. Do the action, run `snapshot(sel, "after")`, and compar
 resized is a finding. For an expand action, a block above or beside the element that moved or
 resized is a finding. Report the action and the deltas.
 
-**Fix.** Float menus and tooltips. Give changing labels and tab panels a fixed width or a minimum
+**Fix.** Float menus and tooltips. Show a hover or focus hint as a tooltip, or render it at all
+times in a reserved line below the row, so it never changes the size of its cell. Give changing labels and tab panels a fixed width or a minimum
 height. Put a notice strip above all panes, or inside the pane as an overlay. Lay out expandable
 cards in independent columns, or set `align-items: start` on the row.
 

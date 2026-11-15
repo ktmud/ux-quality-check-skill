@@ -1,69 +1,53 @@
 WEBVTT
 
 1
-00:00:01.201 --> 00:00:03.398
-Your UI change just passed code review.
+00:00:00.600 --> 00:00:03.393
+You changed the UI. The tests are green.
 
 2
-00:00:04.603 --> 00:00:06.117
-But did anyone hover it?
+00:00:03.600 --> 00:00:05.030
+But does it feel right?
 
 3
-00:00:06.117 --> 00:00:07.505
-Meet UX Quality Check.
+00:00:06.000 --> 00:00:10.215
+Meet UX quality check: a UX eye for your coding agent.
 
 4
-00:00:07.505 --> 00:00:10.470
-It reads the diff, then measures the live page.
+00:00:10.600 --> 00:00:16.048
+It reads your diff, opens the page, and measures it: at rest, on hover, and on focus.
 
 5
-00:00:11.773 --> 00:00:13.469
-Rows that touch on hover?
+00:00:17.400 --> 00:00:19.670
+Hover a row, and the whole list jumps.
 
 6
-00:00:13.469 --> 00:00:14.690
-Zero pixels apart.
+00:00:20.200 --> 00:00:21.055
+Caught.
 
 7
-00:00:14.690 --> 00:00:15.165
-Caught.
+00:00:22.600 --> 00:00:26.737
+A Post button that stays enabled while it posts sends the comment twice.
 
 8
-00:00:16.868 --> 00:00:18.874
-A menu that shoves the page down?
+00:00:27.300 --> 00:00:28.299
+Caught again.
 
 9
-00:00:18.874 --> 00:00:19.300
-Caught.
+00:00:29.200 --> 00:00:32.481
+Gray text that passes in light mode fails in dark.
 
 10
-00:00:21.003 --> 00:00:22.911
-A Save button that writes twice?
+00:00:33.000 --> 00:00:34.448
+Caught. Every time.
 
 11
-00:00:22.911 --> 00:00:23.328
-Caught.
+00:00:35.400 --> 00:00:40.618
+52 rules in six groups, each with a check in code and a check in the browser.
 
 12
-00:00:25.031 --> 00:00:27.489
-A toggle that runs away from your cursor?
+00:00:41.800 --> 00:00:44.667
+Every finding comes with evidence, and a fix.
 
 13
-00:00:27.489 --> 00:00:27.909
-Caught.
-
-14
-00:00:27.909 --> 00:00:28.508
-And fixed.
-
-15
-00:00:32.097 --> 00:00:35.126
-Fifty two rules, mined from real review feedback.
-
-16
-00:00:36.328 --> 00:00:37.491
-UX Quality Check.
-
-17
-00:00:37.491 --> 00:00:39.955
-Just ask your agent to check the UX.
+00:00:46.200 --> 00:00:49.591
+UX quality check. Ship UI that feels finished.

@@ -6,11 +6,11 @@ common UX defects. It reads the code and, when a dev server or a static page and
 available, measures the live page at rest, on hover and on keyboard focus. Each finding has a
 surface, a rule, measured evidence and a fix.
 
-[![Watch the 42-second promo](docs/poster.png)](https://ktmud.github.io/ux-quality-check-skill/tour.mp4)
+[![Watch the 53-second promo](docs/poster.png)](https://ktmud.github.io/ux-quality-check-skill/tour.mp4)
 
 ▶ [Watch the promo](https://ktmud.github.io/ux-quality-check-skill/tour.mp4) ·
-[Try the live demo](https://ktmud.github.io/ux-quality-check-skill/): ten real-world bugs, each a
-mini-app you can measure, break and fix in the browser.
+[Try the live demo](https://ktmud.github.io/ux-quality-check-skill/): a bug lab where you ship
+real UX bugs into a page and watch the skill measure them.
 
 ## Install
 
